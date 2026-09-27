@@ -2,10 +2,12 @@ import type { Router } from 'express';
 import { Router as createRouter } from 'express';
 import {
   createLocation,
+  deleteLocation,
   getLocation,
   listLocations,
   updateWeather,
 } from '../db.js';
+import type { LocationRecord } from '../db.js';
 import { SingaporeWeatherClient, WeatherProviderError, type WeatherSnapshot } from '../weather.js';
 import { logger } from '../logger.js';
 
@@ -86,6 +88,19 @@ export function createLocationsRouter(options: LocationsRouterOptions = {}): Rou
     }
   });
 
+  router.delete('/locations/:locationId', async (request, response, next) => {
+    try {
+      const deleted = await deleteLocation(Number(request.params.locationId));
+      if (!deleted) {
+        response.status(404).json({ detail: 'Location not found' });
+        return;
+      }
+      response.status(204).end();
+    } catch (error) {
+      next(error);
+    }
+  });
+
   router.post('/locations/:locationId/refresh', async (request, response, next) => {
     try {
       const locationId = Number(request.params.locationId);
@@ -95,7 +110,11 @@ export function createLocationsRouter(options: LocationsRouterOptions = {}): Rou
         return;
       }
 
-      const snapshot = await weatherClient.getCurrentWeather(location.latitude, location.longitude);
+      const freshSnapshot = await weatherClient.getCurrentWeather(
+        location.latitude,
+        location.longitude,
+      );
+      const snapshot = keepLastKnownWeather(freshSnapshot, location.weather);
       const updated = await updateWeather(locationId, snapshot);
       response.json(updated);
     } catch (error) {
@@ -108,4 +127,35 @@ export function createLocationsRouter(options: LocationsRouterOptions = {}): Rou
   });
 
   return router;
+}
+
+function keepLastKnownWeather(
+  fresh: WeatherSnapshot,
+  previous: LocationRecord['weather'],
+): LocationRecord['weather'] {
+  return {
+    ...fresh,
+    condition:
+      fresh.condition === 'Unavailable' && previous.condition !== 'Not refreshed'
+        ? previous.condition
+        : fresh.condition,
+    observed_at: fresh.observed_at || previous.observed_at,
+    area: fresh.area ?? previous.area,
+    valid_period_text: fresh.valid_period_text ?? previous.valid_period_text,
+    temperature_c: fresh.temperature_c ?? previous.temperature_c,
+    humidity_percent: fresh.humidity_percent ?? previous.humidity_percent,
+    rainfall_mm: fresh.rainfall_mm ?? previous.rainfall_mm,
+    wind_speed_knots: fresh.wind_speed_knots ?? previous.wind_speed_knots,
+    wind_direction_degrees: fresh.wind_direction_degrees ?? previous.wind_direction_degrees,
+    forecast_low_c: fresh.forecast_low_c ?? previous.forecast_low_c,
+    forecast_high_c: fresh.forecast_high_c ?? previous.forecast_high_c,
+    uv_index: fresh.uv_index ?? previous.uv_index,
+    psi_twenty_four_hourly: fresh.psi_twenty_four_hourly ?? previous.psi_twenty_four_hourly,
+    pm25_one_hourly: fresh.pm25_one_hourly ?? previous.pm25_one_hourly,
+    air_quality_region: fresh.air_quality_region ?? previous.air_quality_region,
+    forecast_periods:
+      fresh.forecast_periods.length > 0 ? fresh.forecast_periods : previous.forecast_periods,
+    daily_forecast:
+      fresh.daily_forecast.length > 0 ? fresh.daily_forecast : previous.daily_forecast,
+  };
 }
