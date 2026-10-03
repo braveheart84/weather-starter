@@ -28,6 +28,54 @@ input:focus-visible {
   @apply outline-none ring-2 ring-white/40 ring-offset-0;
 }
 
+/* Theme tokens let the dashboard keep one set of weather components while
+   changing its palette, typography, surfaces, and overall feel. */
+body[data-theme] {
+  --theme-ink: #f8fafc;
+  --theme-muted: rgb(248 250 252 / 72%);
+  --theme-surface: rgb(255 255 255 / 10%);
+  --theme-line: rgb(255 255 255 / 18%);
+  --theme-accent: #93c5fd;
+  --theme-radius: 1rem;
+  --theme-font: Inter, ui-sans-serif, system-ui, sans-serif;
+  color: var(--theme-ink);
+  font-family: var(--theme-font);
+}
+
+body[data-theme]:not([data-theme='apple']) {
+  background: var(--theme-background);
+  background-attachment: fixed;
+}
+
+body[data-theme]:not([data-theme='apple']) [class*='text-white'] { color: var(--theme-ink) !important; }
+body[data-theme]:not([data-theme='apple']) [class*='border-white'] { border-color: var(--theme-line) !important; }
+body[data-theme]:not([data-theme='apple']) [class*='bg-white/'] { background-color: var(--theme-surface) !important; }
+body[data-theme]:not([data-theme='apple']) .rounded-2xl { border-radius: var(--theme-radius); }
+body[data-theme]:not([data-theme='apple']) .weather-map-card:not(.weather-map-card-expanded) { background: var(--theme-surface); border-color: var(--theme-line); }
+body[data-theme]:not([data-theme='apple']) .weather-map-title { color: var(--theme-ink); }
+body[data-theme]:not([data-theme='apple']) .weather-map-eyebrow { color: var(--theme-muted); }
+body[data-theme]:not([data-theme='apple']) .theme-picker { color: var(--theme-ink); background: var(--theme-surface); border-color: var(--theme-line); }
+body[data-theme]:not([data-theme='apple']) .theme-picker option { color: #172033; }
+body[data-theme]:not([data-theme='apple']) .weather-map-card-expanded { background: #f1f5f9; }
+
+body[data-theme='apple'] .theme-picker { color: #fff; background: rgb(255 255 255 / 10%); border-color: rgb(255 255 255 / 18%); }
+
+body[data-theme='alpine-glass'] { --theme-background:radial-gradient(120% 80% at 70% 0%,rgb(255 255 255 / 58%) 0%,transparent 55%),radial-gradient(90% 70% at 10% 100%,rgb(129 176 218 / 68%) 0%,transparent 60%),linear-gradient(170deg,#d9edf7 0%,#9fc4da 38%,#668da9 72%,#45657f 100%); --theme-ink:#f8fcff; --theme-muted:#d9edf8; --theme-surface:rgb(229 244 252 / 22%); --theme-line:rgb(255 255 255 / 34%); --theme-accent:#bfebff; --theme-radius:1.25rem; --theme-font:Inter,ui-sans-serif,system-ui,sans-serif; }
+body[data-theme='field-journal'] { --theme-background:linear-gradient(145deg,#354b3d,#6c775c 56%,#8e7359); --theme-ink:#fff8e8; --theme-muted:#e9dfc8; --theme-surface:rgb(244 231 201 / 15%); --theme-line:rgb(244 231 201 / 30%); --theme-radius:8px; --theme-font:Georgia,serif; }
+body[data-theme='solaris'] { --theme-background:linear-gradient(155deg,#f6a94d,#ed7964 55%,#8d5369); --theme-ink:#fffaf0; --theme-muted:#fff0d7; --theme-surface:rgb(255 251 235 / 17%); --theme-line:rgb(255 251 235 / 34%); --theme-accent:#ffe082; --theme-radius:1.4rem; }
+body[data-theme='midnight-observatory'] { --theme-background:radial-gradient(ellipse at 50% 0%,#26346b,#10152e 64%,#090d1e); --theme-ink:#edf4ff; --theme-muted:#acbbdf; --theme-surface:rgb(93 111 190 / 14%); --theme-line:rgb(150 173 255 / 22%); --theme-accent:#6ce5ff; }
+body[data-theme='coastal-forecast'] { --theme-background:linear-gradient(150deg,#a4dfd2,#4d9e9e 55%,#276c7c); --theme-ink:#f2fffb; --theme-muted:#d5f5ec; --theme-surface:rgb(236 255 250 / 16%); --theme-line:rgb(236 255 250 / 30%); --theme-radius:1.5rem; }
+body[data-theme='storm-signal'] { --theme-background:linear-gradient(150deg,#283343,#172331 60%,#111927); --theme-ink:#f3f6fa; --theme-muted:#b7c1ce; --theme-surface:rgb(190 208 230 / 9%); --theme-line:rgb(190 208 230 / 20%); --theme-radius:10px; }
+body[data-theme='nordic-minimal'] { --theme-background:linear-gradient(155deg,#edf1f2,#d8e0e4 60%,#bccbd2); --theme-ink:#243340; --theme-muted:#536572; --theme-surface:rgb(255 255 255 / 65%); --theme-line:rgb(55 77 90 / 18%); --theme-radius:8px; }
+body[data-theme='retro-station'] { --theme-background:linear-gradient(145deg,#e8d9b4,#bda77b 60%,#83785d); --theme-ink:#352f24; --theme-muted:#605541; --theme-surface:rgb(255 247 222 / 56%); --theme-line:rgb(69 57 36 / 24%); --theme-radius:6px; --theme-font:ui-monospace,SFMono-Regular,monospace; }
+body[data-theme='citrus-pop'] { --theme-background:linear-gradient(145deg,#ffe66b,#f8a447 55%,#ed7158); --theme-ink:#473018; --theme-muted:#76502b; --theme-surface:rgb(255 255 245 / 55%); --theme-line:rgb(98 69 25 / 18%); --theme-radius:1.5rem; }
+body[data-theme='urban-grid'] { --theme-background:linear-gradient(145deg,#78858b,#46545e 58%,#293844); --theme-ink:#f4f7f8; --theme-muted:#c2cdd2; --theme-surface:rgb(235 241 244 / 12%); --theme-line:rgb(235 241 244 / 24%); --theme-radius:6px; }
+body[data-theme='cloud-atlas'] { --theme-background:linear-gradient(145deg,#dce8f6,#abbcdf 55%,#7789b4); --theme-ink:#263351; --theme-muted:#4b5c7e; --theme-surface:rgb(255 255 255 / 48%); --theme-line:rgb(46 65 100 / 18%); --theme-radius:1.5rem; }
+body[data-theme='monsoon-garden'] { --theme-background:linear-gradient(150deg,#184f46,#16706a 56%,#2e9583); --theme-ink:#eafff7; --theme-muted:#bce5d7; --theme-surface:rgb(194 255 227 / 10%); --theme-line:rgb(194 255 227 / 20%); }
+body[data-theme='paper-almanac'] { --theme-background:linear-gradient(145deg,#f3ead5,#e1d2b2 60%,#c7b18c); --theme-ink:#302a22; --theme-muted:#625747; --theme-surface:rgb(255 252 241 / 65%); --theme-line:rgb(76 62 43 / 22%); --theme-radius:4px; --theme-font:Georgia,serif; }
+body[data-theme='aurora-night'] { --theme-background:radial-gradient(ellipse at 70% 0%,#176b70,#102945 45%,#101329 85%); --theme-ink:#edffff; --theme-muted:#b2dedc; --theme-surface:rgb(123 225 210 / 10%); --theme-line:rgb(123 225 210 / 23%); --theme-accent:#6fffe9; }
+body[data-theme='instrument-panel'] { --theme-background:linear-gradient(145deg,#303a42,#1d272f 60%,#111a20); --theme-ink:#edf2f4; --theme-muted:#aebbc2; --theme-surface:rgb(206 221 227 / 8%); --theme-line:rgb(206 221 227 / 19%); --theme-radius:6px; --theme-font:ui-monospace,SFMono-Regular,monospace; }
+
 .weather-map-card {
   @apply relative flex flex-col overflow-hidden rounded-2xl border border-white/15 bg-white/[0.12] p-3 shadow-xl shadow-black/10 backdrop-blur-xl;
 }
