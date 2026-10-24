@@ -43,6 +43,9 @@ describe('locations API', () => {
         async getCurrentWeather() {
           return weather;
         },
+        async resolveForecastArea() {
+          return 'Bishan';
+        },
       },
     });
   });
@@ -73,5 +76,19 @@ describe('locations API', () => {
     const listResponse = await request(app).get('/api/locations').expect(200);
     expect(listResponse.body.locations).toHaveLength(1);
     expect(listResponse.body.locations[0].weather.condition).toBe('Cloudy');
+  });
+
+  it('resolves the nearest forecast area through the locations API', async () => {
+    await request(app)
+      .post('/api/locations/resolve-area')
+      .send({ latitude: 1.35, longitude: 103.85 })
+      .expect(200, { area: 'Bishan' });
+  });
+
+  it('rejects area resolution outside Singapore', async () => {
+    await request(app)
+      .post('/api/locations/resolve-area')
+      .send({ latitude: 2, longitude: 103.85 })
+      .expect(422);
   });
 });

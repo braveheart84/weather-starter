@@ -28,6 +28,12 @@ export const listLocations = () => request<LocationsResponse>('/locations');
 export const createLocation = (payload: CreateLocationPayload) =>
   request<Location>('/locations', { method: 'POST', body: JSON.stringify(payload) });
 
+export const resolveForecastArea = (payload: CreateLocationPayload) =>
+  request<{ area: string | null }>('/locations/resolve-area', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+
 export const refreshLocation = (id: number) =>
   request<Location>(`/locations/${id}/refresh`, { method: 'POST' });
 

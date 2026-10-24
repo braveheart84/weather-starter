@@ -1,14 +1,69 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useStore } from '../state/store';
+import { resolveForecastArea } from '../api';
 import { PlusIcon } from './icons';
 
 export function AddLocationForm() {
-  const { isAdding, setAdding, create } = useStore();
+  const { isAdding, setAdding, create, locations, select } = useStore();
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
+
+  const useMyLocation = async () => {
+    setLocationError(null);
+    if (!navigator.geolocation) {
+      setLocationError('Location is not supported by this browser. Enter coordinates manually.');
+      return;
+    }
+    setLocating(true);
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 0,
+        });
+      });
+      const coordinates = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      };
+      if (
+        coordinates.latitude < 1.1 || coordinates.latitude > 1.5 ||
+        coordinates.longitude < 103.6 || coordinates.longitude > 104.1
+      ) {
+        setLocationError('No Singapore forecast is available');
+        return;
+      }
+      const { area } = await resolveForecastArea(coordinates);
+      const existing = area
+        ? locations.find((location) => location.weather.area === area)
+        : undefined;
+      if (existing) {
+        select(existing.id);
+        setAdding(false);
+      } else {
+        await create(coordinates);
+      }
+    } catch (error) {
+      const geolocationError = error as GeolocationPositionError;
+      if (geolocationError?.code === 1) {
+        setLocationError('Location permission was denied. Allow access in your browser or enter coordinates manually.');
+      } else if (geolocationError?.code === 2) {
+        setLocationError('Your position is unavailable. Check your device location settings and try again.');
+      } else if (geolocationError?.code === 3) {
+        setLocationError('Finding your position timed out. Try again or enter coordinates manually.');
+      } else {
+        setLocationError(error instanceof Error ? error.message : 'Could not use your location. Try again or enter coordinates manually.');
+      }
+    } finally {
+      setLocating(false);
+    }
+  };
 
   const cancel = () => {
     setLatitude('');
@@ -34,14 +89,25 @@ export function AddLocationForm() {
 
   if (!isAdding) {
     return (
-      <button
-        type="button"
-        onClick={() => setAdding(true)}
-        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/[0.07] px-3 py-2.5 text-sm font-medium text-white/85 backdrop-blur-xl hover:bg-white/[0.12]"
-      >
-        <PlusIcon />
-        <span>Add Location</span>
-      </button>
+      <div className="grid gap-2">
+        <button
+          type="button"
+          onClick={() => void useMyLocation()}
+          disabled={locating}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/[0.07] px-3 py-2.5 text-sm font-medium text-white/85 backdrop-blur-xl hover:bg-white/[0.12] disabled:opacity-60"
+        >
+          {locating ? <span role="status" aria-live="polite">Finding your location…</span> : 'Use my location'}
+        </button>
+        <button
+          type="button"
+          onClick={() => setAdding(true)}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/[0.07] px-3 py-2.5 text-sm font-medium text-white/85 backdrop-blur-xl hover:bg-white/[0.12]"
+        >
+          <PlusIcon />
+          <span>Add Location</span>
+        </button>
+        {locationError && <p role="alert" className="rounded-md border border-red-300/30 bg-red-500/15 px-2.5 py-1.5 text-xs text-red-100">{locationError}</p>}
+      </div>
     );
   }
 
@@ -100,6 +166,15 @@ export function AddLocationForm() {
           {submitError}
         </p>
       )}
+      <button
+        type="button"
+        onClick={() => void useMyLocation()}
+        disabled={locating || submitting}
+        className="rounded-md border border-white/15 px-3 py-1.5 text-xs font-semibold text-white/90 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {locating ? <span role="status" aria-live="polite">Finding your location…</span> : 'Use my location'}
+      </button>
+      {locationError && <p role="alert" className="rounded-md border border-red-300/30 bg-red-500/15 px-2.5 py-1.5 text-xs text-red-100">{locationError}</p>}
     </form>
   );
 }

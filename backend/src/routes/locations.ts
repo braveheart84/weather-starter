@@ -13,6 +13,7 @@ import { logger } from '../logger.js';
 
 export interface WeatherClient {
   getCurrentWeather(latitude: number, longitude: number): Promise<WeatherSnapshot>;
+  resolveForecastArea(latitude: number, longitude: number): Promise<string | null>;
 }
 
 interface LocationsRouterOptions {
@@ -28,6 +29,28 @@ export function createLocationsRouter(options: LocationsRouterOptions = {}): Rou
     try {
       response.json({ locations: await listLocations() });
     } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post('/locations/resolve-area', async (request, response, next) => {
+    try {
+      const latitude = Number(request.body?.latitude);
+      const longitude = Number(request.body?.longitude);
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+        response.status(422).json({ detail: 'latitude and longitude are required' });
+        return;
+      }
+      if (!(1.1 <= latitude && latitude <= 1.5 && 103.6 <= longitude && longitude <= 104.1)) {
+        response.status(422).json({ detail: 'Coordinates must be within Singapore (lat 1.1-1.5, lon 103.6-104.1)' });
+        return;
+      }
+      response.json({ area: await weatherClient.resolveForecastArea(latitude, longitude) });
+    } catch (error) {
+      if (error instanceof WeatherProviderError) {
+        response.status(502).json({ detail: error.message });
+        return;
+      }
       next(error);
     }
   });

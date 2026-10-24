@@ -231,6 +231,17 @@ export class SingaporeWeatherClient {
     return this.fetchJson(`${this.apiBaseUrl()}/v2/real-time/api/two-hr-forecast`);
   }
 
+  async resolveForecastArea(latitude: number, longitude: number): Promise<string | null> {
+    const payload = await this.fetchLatestForecastPayload();
+    if (payload.code !== undefined && payload.code !== 0) {
+      throw new WeatherProviderError(payload.errorMsg ?? 'Weather provider returned an error');
+    }
+    const root = payload.data ?? payload;
+    const area = nearestAreaName(root.area_metadata ?? [], latitude, longitude);
+    const forecastAreas = new Set((root.items?.[0]?.forecasts ?? []).map((item) => item.area));
+    return area && forecastAreas.has(area) ? area : null;
+  }
+
   async fetchNearestReading(
     endpoint:
       | 'air-temperature'
