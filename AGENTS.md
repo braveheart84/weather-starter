@@ -9,3 +9,13 @@ Weather Starter is an npm-workspace TypeScript app for tracking Singapore weathe
   - [Architecture and API boundaries](docs/agent-guides/architecture.md)
   - [Testing](docs/agent-guides/testing.md)
   - [Local development and database workflow](docs/agent-guides/local-development.md)
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs for this repo live in GitHub Issues on `braveheart84/weather-starter`. Use the `gh` CLI with `--repo braveheart84/weather-starter`. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Use the single-context domain docs layout. See `docs/agents/domain.md`.
