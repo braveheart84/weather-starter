@@ -28,10 +28,13 @@ function markerIcon(isSelected: boolean) {
 function MapCamera({ locations }: { locations: Location[] }) {
   const map = useMap();
   const locationsRef = useRef(locations);
-  locationsRef.current = locations;
   const locationsKey = locations
     .map(({ id, latitude, longitude }) => `${id}:${latitude},${longitude}`)
     .join('|');
+
+  useEffect(() => {
+    locationsRef.current = locations;
+  }, [locations]);
 
   useEffect(() => {
     const currentLocations = locationsRef.current;

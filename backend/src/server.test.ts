@@ -1,13 +1,25 @@
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import request from 'supertest';
-import { beforeAll, describe, it } from 'vitest';
+import { afterAll, beforeAll, describe, it } from 'vitest';
 
 describe('server API', () => {
   let app: Awaited<ReturnType<typeof import('./server.js').createApp>>;
+  let tempDir: string;
 
   beforeAll(async () => {
+    tempDir = await mkdtemp(join(tmpdir(), 'weather-starter-server-test-'));
+    process.env.DATABASE_PATH = join(tempDir, 'weather.db');
     process.env.LOG_LEVEL = 'silent';
     const { createApp } = await import('./server.js');
     app = await createApp({ serveFrontend: false, enableRequestLogging: false });
+  }, 30_000);
+
+  afterAll(async () => {
+    const { closeDatabase } = await import('./db.js');
+    closeDatabase();
+    await rm(tempDir, { recursive: true, force: true });
   });
 
   it('reports a healthy status', async () => {

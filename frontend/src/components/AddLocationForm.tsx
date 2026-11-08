@@ -13,7 +13,7 @@ export function AddLocationForm() {
   const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
 
-  const useMyLocation = async () => {
+  const locateMe = async () => {
     setLocationError(null);
     if (!navigator.geolocation) {
       setLocationError('Location is not supported by this browser. Enter coordinates manually.');
@@ -92,7 +92,7 @@ export function AddLocationForm() {
       <div className="grid gap-2">
         <button
           type="button"
-          onClick={() => void useMyLocation()}
+          onClick={() => void locateMe()}
           disabled={locating}
           className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/[0.07] px-3 py-2.5 text-sm font-medium text-white/85 backdrop-blur-xl hover:bg-white/[0.12] disabled:opacity-60"
         >
@@ -168,7 +168,7 @@ export function AddLocationForm() {
       )}
       <button
         type="button"
-        onClick={() => void useMyLocation()}
+        onClick={() => void locateMe()}
         disabled={locating || submitting}
         className="rounded-md border border-white/15 px-3 py-1.5 text-xs font-semibold text-white/90 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
       >

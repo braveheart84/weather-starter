@@ -7,7 +7,7 @@
     "prepare": "husky",
     "dev": "node scripts/dev.mjs",
     "build": "npm run build -w frontend && tsc -p backend/tsconfig.json",
-    "lint": "eslint .",
+    "lint": "eslint backend/src frontend/src scripts eslint.config.js",
     "start": "node scripts/start.mjs",
     "doctor": "node scripts/doctor.mjs",
     "reset": "node scripts/reset.mjs",
