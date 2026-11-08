@@ -91,4 +91,39 @@ describe('locations API', () => {
       .send({ latitude: 2, longitude: 103.85 })
       .expect(422);
   });
+
+  it('rejects invalid coordinates when creating a location', async () => {
+    await request(app)
+      .post('/api/locations')
+      .send({ latitude: 'invalid', longitude: 103.85 })
+      .expect(422, { detail: 'latitude and longitude are required' });
+
+    await request(app)
+      .post('/api/locations')
+      .send({ latitude: 1.35, longitude: 103.85 })
+      .expect(409);
+  });
+
+  it('gets, refreshes, and deletes a location', async () => {
+    const created = await request(app)
+      .post('/api/locations')
+      .send({ latitude: 1.36, longitude: 103.86 })
+      .expect(201);
+
+    const locationId = created.body.id as number;
+    await request(app)
+      .get(`/api/locations/${locationId}`)
+      .expect(200)
+      .expect(({ body }) => expect(body.weather.condition).toBe('Cloudy'));
+
+    await request(app)
+      .post(`/api/locations/${locationId}/refresh`)
+      .expect(200)
+      .expect(({ body }) => expect(body.weather.temperature_c).toBe(29));
+
+    await request(app).delete(`/api/locations/${locationId}`).expect(204);
+    await request(app).get(`/api/locations/${locationId}`).expect(404);
+    await request(app).delete(`/api/locations/${locationId}`).expect(404);
+    await request(app).post(`/api/locations/${locationId}/refresh`).expect(404);
+  });
 });
